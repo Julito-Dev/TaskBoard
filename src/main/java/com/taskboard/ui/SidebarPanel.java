@@ -41,12 +41,50 @@ public class SidebarPanel extends JPanel {
         header.setBorder(new EmptyBorder(0, 4, 28, 4));
 
 
+        JLabel logo = new JLabel("✓");
+        logo.setOpaque(true);
+        logo.setBackground(ACCENT);
+        logo.setForeground(Color.WHITE);
+        logo.setFont(new Font("SansSerif", Font.BOLD, 24));
+        logo.setHorizontalAlignment(SwingConstants.CENTER);
+        logo.setPreferredSize(new Dimension(42, 42));
+
+        // Panel que contiene el titulo y subtitulo
+        JPanel brand = new JPanel();
+        brand.setOpaque(false);
+        brand.setLayout(new BoxLayout(brand, BoxLayout.Y_AXIS));
+
+        JLabel title = new JLabel("TaskBoard");
+        title.setForeground(TEXT);
+        title.setFont(new Font("SansSerif", Font.BOLD,19));
+
+        JLabel subtitle = new JLabel("WORKSPACE");
+        subtitle.setForeground(MUTED);
+        subtitle.setFont(new Font("SansSerif", Font.PLAIN,10));
+
+        brand.add(title);
+        brand.add(Box.createVerticalStrut(4));
+        brand.add(subtitle);
+
+        header.add(logo, BorderLayout.WEST);
+        header.add(brand, BorderLayout.CENTER);
+
+
+
         // Parte media: Aqui se muestran los equipos
         teamsContainer = new JPanel();
         teamsContainer.setOpaque(false);
         teamsContainer.setLayout(new BoxLayout(teamsContainer, BoxLayout.Y_AXIS));
 
         // Agregar botones luego...
+
+
+
+
+
+
+        // Agregando los paneles al SidebarPanel principal
+        add(header, BorderLayout.NORTH);
     }
 
 
