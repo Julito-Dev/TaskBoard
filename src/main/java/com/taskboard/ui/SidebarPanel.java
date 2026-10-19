@@ -115,15 +115,57 @@ public class SidebarPanel extends JPanel {
         navigation.add(teamsHeader);
         navigation.add(teamsContainer);
 
+        
+        // Panel Inferior. Aqui se muestra informacion muy basica sobre el perfil del usuario.
 
+        //En este panel ira la info de perfil
+        JPanel footer = new JPanel();
+        footer.setOpaque(false);
+        footer.setBorder(new EmptyBorder(14,4,4,4));
 
+        // Separador para el panel inferior y el medio.
+        JSeparator separator = new JSeparator();
+        separator.setForeground(new Color(51,59,75));
+        separator.setBackground(new Color(51, 59, 75));
 
+        JLabel avatar = new JLabel("U");
+        avatar.setOpaque(true);
+        avatar.setBackground(new Color(64,75,97));
+        avatar.setForeground(Color.WHITE);
+        avatar.setFont(new Font("SansSerif", Font.BOLD,15));
+        avatar.setHorizontalAlignment(SwingConstants.CENTER);
+        avatar.setPreferredSize(new Dimension(36,36));
 
+        JPanel userInfo = new JPanel();
+        userInfo.setOpaque(false);
+        userInfo.setLayout(new BoxLayout(userInfo, BoxLayout.Y_AXIS));
+
+        JLabel username = new JLabel("Usuario");
+        username.setForeground(TEXT);
+        username.setFont(new Font("SansSerif",Font.BOLD, 11));
+
+        JLabel profile = new JLabel("Mi espacio");
+        profile.setForeground(TEXT);
+        profile.setFont(new Font("SansSerif", Font.PLAIN,11));
+
+        userInfo.add(username);
+        userInfo.add(Box.createVerticalStrut(4));
+        userInfo.add(profile);
+
+        footer.add(avatar, BorderLayout.WEST);
+        footer.add(userInfo, BorderLayout.CENTER);
+
+        //Subpanel Principal
+        JPanel bottom = new JPanel(new BorderLayout(0,14));
+        bottom.setOpaque(false);
+        bottom.add(separator, BorderLayout.NORTH);
+        bottom.add(footer, BorderLayout.CENTER);
 
 
         // Agregando los subpaneles al SidebarPanel principal
         add(header, BorderLayout.NORTH);
         add(navigation, BorderLayout.CENTER);
+        add(bottom, BorderLayout.SOUTH);
     }
 
 
