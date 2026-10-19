@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
 
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
 public class SidebarPanel extends JPanel {
