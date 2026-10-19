@@ -69,22 +69,51 @@ public class SidebarPanel extends JPanel {
         header.add(logo, BorderLayout.WEST);
         header.add(brand, BorderLayout.CENTER);
 
+        // Parte media: Navegacion general, Aqui se muestran los equipos y su info
+
+        //Contenedor principal
+        JPanel navigation = new JPanel();
+        navigation.setOpaque(false);
+        navigation.setLayout(new BoxLayout(navigation, BoxLayout.Y_AXIS));
+        
+
+        // Cabecera para la seccion de equipos
+        JPanel teamsHeader = new JPanel();
+        teamsHeader.setOpaque(false);
+        teamsHeader.setBorder(new EmptyBorder(26,5,12,3));
+
+        JLabel teamsLabel = new JLabel("Tus Equipos");
+        teamsLabel.setForeground(MUTED);
+        teamsLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
+
+        JButton addButton = new JButton("+"); 
+        addButton.setForeground(ACCENT);
+        addButton.setFont(new Font("SansSerif", Font.BOLD, 20));
+        addButton.setToolTipText("Añadir Equipo");
+        // Boton sin funcion. Falta agregar el actionListener
+
+        teamsHeader.add(teamsLabel, BorderLayout.WEST);
+        teamsHeader.add(addButton, BorderLayout.EAST);
 
 
-        // Parte media: Aqui se muestran los equipos
+
+        // Panel para los equipos
         teamsContainer = new JPanel();
         teamsContainer.setOpaque(false);
         teamsContainer.setLayout(new BoxLayout(teamsContainer, BoxLayout.Y_AXIS));
 
-        // Agregar botones luego...
+    
+        navigation.add(teamsHeader);
 
 
 
 
 
 
-        // Agregando los paneles al SidebarPanel principal
+
+        // Agregando los subpaneles al SidebarPanel principal
         add(header, BorderLayout.NORTH);
+        add(navigation, BorderLayout.CENTER);
     }
 
 
