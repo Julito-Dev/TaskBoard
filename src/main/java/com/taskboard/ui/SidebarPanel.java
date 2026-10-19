@@ -3,6 +3,8 @@ package com.taskboard.ui;
 import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
+
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
 public class SidebarPanel extends JPanel {
@@ -97,13 +99,21 @@ public class SidebarPanel extends JPanel {
 
 
 
-        // Panel para los equipos
+        // Panel para la lista de equipos
         teamsContainer = new JPanel();
         teamsContainer.setOpaque(false);
         teamsContainer.setLayout(new BoxLayout(teamsContainer, BoxLayout.Y_AXIS));
 
-    
+        // Equipos. Lo ideal seria que el constructor recibiera los equipos List<Equipo> equipos y los agregara con el metodo addTeamButton()
+        // Sin embargo por ahora (No hay persistencia), los equipos se muestran HardCodeados.
+        
+        addTeamButton("Universidad", "U", "6 Tareas");
+        addTeamButton("Proyecto Messi", "MS10", "1 tarea");
+
+        
+        // Agregar elementos al subpanel
         navigation.add(teamsHeader);
+        navigation.add(teamsContainer);
 
 
 
@@ -116,6 +126,51 @@ public class SidebarPanel extends JPanel {
         add(navigation, BorderLayout.CENTER);
     }
 
+
+    private void addTeamButton(String name, String icon, String taskCount){
+        JButton button = new JButton();
+        button.setLayout(new BorderLayout(10,0));
+        button.setBorder(new EmptyBorder(9,10,9,8));
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setOpaque(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 58));
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel teamIcon = new JLabel(icon);
+        teamIcon.setForeground(ACCENT);
+        teamIcon.setFont(new Font("SansSerif", Font.BOLD,19));
+
+        JPanel details = new JPanel();
+        details.setOpaque(false);
+        details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
+
+        JLabel teamName = new JLabel(name);
+        teamName.setOpaque(false);
+        teamName.setForeground(TEXT);
+        teamName.setFont(new Font("SansSerif", Font.BOLD, 12));
+
+        JLabel count = new JLabel(taskCount);
+        count.setForeground(MUTED);
+        count.setFont(new Font("SansSerif", Font.BOLD, 10));
+
+        details.add(teamName);
+        details.add(Box.createVerticalStrut(4));
+        details.add(count);
+
+        JLabel arrow = new JLabel(">");
+        arrow.setForeground(MUTED);
+        arrow.setFont(new Font("SansSerif", Font.PLAIN, 22));
+
+        button.add(teamIcon, BorderLayout.WEST);
+        button.add(details, BorderLayout.CENTER);
+        button.add(arrow, BorderLayout.EAST);
+
+        teamsContainer.add(button);
+        teamsContainer.add(Box.createVerticalStrut(4));
+    }
 
 
 
