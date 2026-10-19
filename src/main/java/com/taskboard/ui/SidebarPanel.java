@@ -87,7 +87,8 @@ public class SidebarPanel extends JPanel {
         teamsLabel.setForeground(MUTED);
         teamsLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
 
-        JButton addButton = new JButton("+"); 
+        JButton addButton = new JButton("+");
+        styleButton(addButton);
         addButton.setForeground(ACCENT);
         addButton.setFont(new Font("SansSerif", Font.BOLD, 20));
         addButton.setToolTipText("Añadir Equipo");
@@ -213,6 +214,18 @@ public class SidebarPanel extends JPanel {
         teamsContainer.add(Box.createVerticalStrut(4));
     }
 
-
+    private void styleButton(JButton button){  
+        // Este metodo es usado para darle estilo al boton de "+" en el panel del medio
+        button.setBackground(BACKGROUND);
+        button.setForeground(TEXT);
+        button.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        button.setFocusPainted(false);
+        button.setFocusPainted(false);
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        button.setBorder(new EmptyBorder(11,10,11,10));
+    }
+    
 
 }
