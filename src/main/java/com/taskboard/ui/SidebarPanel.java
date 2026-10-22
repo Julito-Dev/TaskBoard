@@ -6,7 +6,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
-
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicButtonUI;
 
@@ -28,13 +29,23 @@ public class SidebarPanel extends JPanel {
     private final JPanel teamsContainer;
     private final Consumer<String> onTeamSelected;  // Esta funcion recibe un String y no retorna nada, muy util para conectarlo con el
                                                     // Frame principal y avisarle sobre que equipo selecciono el usuario.
+    
+    // Equipos que muestra el panel. Copia propia para no depender de la lista que le pasa el caller.
+    private final List<Team> teams = new ArrayList<>();
 
+    // Botones ya creados, uno por cada equipo de la lista
+    private  final List<TeamButton> teamsButtons = new ArrayList<>();
     private String selectedTeam = "TaskBoard";
 
     //constructor
-    public SidebarPanel(Consumer<String> onTeamSelected){
-        this.onTeamSelected = onTeamSelected;
-        
+    public SidebarPanel(Consumer<String> onTeamSelected){    // Este constructor es temporal. No lo usara Main (Solo para debuggear)
+        this(List.of(), onTeamSelected); 
+    }
+    
+    public SidebarPanel(List<Team> teams, Consumer<String> onTeamSelected){
+        this. onTeamSelected = onTeamSelected;
+        this.teams.addAll(teams);
+
         setLayout(new BorderLayout());
         setBackground(BACKGROUND);
         setBorder(new EmptyBorder(22, 14, 14, 14));
@@ -108,11 +119,9 @@ public class SidebarPanel extends JPanel {
         teamsContainer.setOpaque(false);
         teamsContainer.setLayout(new BoxLayout(teamsContainer, BoxLayout.Y_AXIS));
 
-        // Equipos. Lo ideal seria que el constructor recibiera los equipos List<Equipo> equipos y los agregara con el metodo addTeamButton()
-        // Sin embargo por ahora (No hay persistencia), los equipos se muestran HardCodeados.
-        
-        addTeamButton("Universidad", "U", "6 Tareas");
-        addTeamButton("Proyecto Messi", "MS10", "1 tarea");
+        //Construyendo los equipos
+        rebuildTeams();
+
 
         
         // Agregar elementos al subpanel
@@ -173,19 +182,10 @@ public class SidebarPanel extends JPanel {
     }
 
 
-    private void addTeamButton(String name, String icon, String taskCount){
-        JButton button = new JButton();
-        button.setLayout(new BorderLayout(10,0));
-        button.setBorder(new EmptyBorder(9,10,9,8));
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
-        button.setOpaque(false);
-        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 58));
-        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+    private void addTeamButton(Team team){
+        TeamButton button = new TeamButton(team);
 
-        JLabel teamIcon = new JLabel(icon);
+        JLabel teamIcon = new JLabel(team.getIcon());
         teamIcon.setForeground(ACCENT);
         teamIcon.setFont(new Font("SansSerif", Font.BOLD,19));
 
@@ -193,12 +193,12 @@ public class SidebarPanel extends JPanel {
         details.setOpaque(false);
         details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
 
-        JLabel teamName = new JLabel(name);
+        JLabel teamName = new JLabel(team.getName());
         teamName.setOpaque(false);
         teamName.setForeground(TEXT);
         teamName.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        JLabel count = new JLabel(taskCount);
+        JLabel count = new JLabel(taskCountText(team.getTaskCount()));
         count.setForeground(MUTED);
         count.setFont(new Font("SansSerif", Font.BOLD, 10));
 
@@ -214,8 +214,38 @@ public class SidebarPanel extends JPanel {
         button.add(details, BorderLayout.CENTER);
         button.add(arrow, BorderLayout.EAST);
 
+        teamsButtons.add(button);
         teamsContainer.add(button);
         teamsContainer.add(Box.createVerticalStrut(4));
+    }
+    public void setTeams(List<Team> teams){
+        // Reemplaza la lista de equipos de todo el panel
+        this.teams.clear();
+        this.teams.addAll(teams);
+        rebuildTeams();
+    }
+
+    public void addTeam(Team team){
+        // Agrega un equipo nuevo al panel (Lo usara el boton +)
+        teams.add(team);
+        rebuildTeams();
+    }
+
+    private void rebuildTeams(){
+        // Borra el contenedor y vuelve a pintar un boton por cada equipo
+        teamsContainer.removeAll();
+        teamsButtons.clear();
+
+        for (Team team : teams){
+            addTeamButton(team);
+        }
+        teamsContainer.revalidate();
+        teamsContainer.repaint();
+    }
+
+    private static String taskCountText(int count){
+        // Este metodo solo formatea el texto para mostrar tareas en singular o plural.
+        return count + (count == 1 ? " tarea" : " tareas");
     }
 
     private void styleButton(JButton button){  
