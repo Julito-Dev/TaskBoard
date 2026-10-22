@@ -37,13 +37,20 @@ public class SidebarPanel extends JPanel {
     private  final List<TeamButton> teamsButtons = new ArrayList<>();
     private Team selectedTeam;
 
+    // Se dispara cuando el usuario da click en el boton + para agregar un equipo
+    private final Runnable onAddTeamRequested;
+
     //constructor
     public SidebarPanel(Consumer<String> onTeamSelected){    // Este constructor es temporal. No lo usara Main (Solo para debuggear)
-        this(List.of(), onTeamSelected); 
+        this(List.of(), onTeamSelected, () -> { }); 
     }
     
     public SidebarPanel(List<Team> teams, Consumer<String> onTeamSelected){
-        this. onTeamSelected = onTeamSelected;
+        this(teams, onTeamSelected, () -> { });
+    }
+    public SidebarPanel(List<Team> teams, Consumer<String> onTeamSelected, Runnable onAddTeamRequested){
+        this.onTeamSelected = onTeamSelected;
+        this.onAddTeamRequested = onAddTeamRequested;
         this.teams.addAll(teams);
 
         setLayout(new BorderLayout());
@@ -107,7 +114,13 @@ public class SidebarPanel extends JPanel {
         addButton.setForeground(ACCENT);
         addButton.setFont(new Font("SansSerif", Font.BOLD, 20));
         addButton.setToolTipText("Añadir Equipo");
-        // Boton sin funcion. Falta agregar el actionListener
+        
+        // Se dispara al dar click
+        addButton.addActionListener(e -> {
+            if(onAddTeamRequested != null){
+                onAddTeamRequested.run();
+            }
+        });
 
         teamsHeader.add(teamsLabel, BorderLayout.WEST);
         teamsHeader.add(addButton, BorderLayout.EAST);
@@ -217,9 +230,7 @@ public class SidebarPanel extends JPanel {
         // Action listener: Click en el equipo, se marca seleccionado y se avisa al frame principal
         button.addActionListener(e -> {
             selectTeam(team);
-            if(onTeamSelected != null){
-                onTeamSelected.accept(team.getName());
-            }
+            notifyTeamSelected(team);
         });
 
         teamsButtons.add(button);
@@ -239,6 +250,7 @@ public class SidebarPanel extends JPanel {
         teams.add(team);
         rebuildTeams();
         selectTeam(team);
+        notifyTeamSelected(team);
     }
 
     private void rebuildTeams(){
@@ -261,6 +273,12 @@ public class SidebarPanel extends JPanel {
 
         teamsContainer.revalidate();
         teamsContainer.repaint();
+    }
+
+    private void notifyTeamSelected(Team team){
+        if(onTeamSelected != null){
+            onTeamSelected.accept(team.getName());
+        }
     }
 
     private void selectTeam(Team team){
