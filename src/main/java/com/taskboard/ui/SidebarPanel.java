@@ -288,7 +288,6 @@ public class SidebarPanel extends JPanel {
         button.setForeground(TEXT);
         button.setFont(new Font("SansSerif", Font.PLAIN, 13));
         button.setFocusPainted(false);
-        button.setFocusPainted(false);
         button.setContentAreaFilled(true);
         button.setOpaque(true);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
