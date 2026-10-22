@@ -35,7 +35,7 @@ public class SidebarPanel extends JPanel {
 
     // Botones ya creados, uno por cada equipo de la lista
     private  final List<TeamButton> teamsButtons = new ArrayList<>();
-    private String selectedTeam = "TaskBoard";
+    private Team selectedTeam;
 
     //constructor
     public SidebarPanel(Consumer<String> onTeamSelected){    // Este constructor es temporal. No lo usara Main (Solo para debuggear)
@@ -214,10 +214,19 @@ public class SidebarPanel extends JPanel {
         button.add(details, BorderLayout.CENTER);
         button.add(arrow, BorderLayout.EAST);
 
+        // Action listener: Click en el equipo, se marca seleccionado y se avisa al frame principal
+        button.addActionListener(e -> {
+            selectTeam(team);
+            if(onTeamSelected != null){
+                onTeamSelected.accept(team.getName());
+            }
+        });
+
         teamsButtons.add(button);
         teamsContainer.add(button);
         teamsContainer.add(Box.createVerticalStrut(4));
     }
+
     public void setTeams(List<Team> teams){
         // Reemplaza la lista de equipos de todo el panel
         this.teams.clear();
@@ -229,6 +238,7 @@ public class SidebarPanel extends JPanel {
         // Agrega un equipo nuevo al panel (Lo usara el boton +)
         teams.add(team);
         rebuildTeams();
+        selectTeam(team);
     }
 
     private void rebuildTeams(){
@@ -239,8 +249,32 @@ public class SidebarPanel extends JPanel {
         for (Team team : teams){
             addTeamButton(team);
         }
+
+        if (selectedTeam != null){
+            for(Team team : teams){
+                if(team.getId() == selectedTeam.getId()){
+                    selectTeam(team);
+                    break;
+                }
+            }
+        }
+
         teamsContainer.revalidate();
         teamsContainer.repaint();
+    }
+
+    private void selectTeam(Team team){
+        // Marca el equipo como seleccionado y actualiza el resaltado de los demas botones (equipos)
+        selectedTeam = team;
+
+        for(TeamButton button : teamsButtons){
+            button.setActive(button.getTeam().getId() == team.getId());
+        }
+    }
+
+    public Team getSelectedTeam(){
+        // Devuelve el equipo que esta seleccionado en el momento.
+        return selectedTeam;
     }
 
     private static String taskCountText(int count){
