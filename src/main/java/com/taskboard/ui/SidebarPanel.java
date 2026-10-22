@@ -1,10 +1,14 @@
 package com.taskboard.ui;
 
+import com.taskboard.model.Team;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
 
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.basic.BasicButtonUI;
 
 public class SidebarPanel extends JPanel {
 
@@ -226,6 +230,72 @@ public class SidebarPanel extends JPanel {
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         button.setBorder(new EmptyBorder(11,10,11,10));
     }
-    
 
+    private static class TeamButton extends JButton {
+
+        private final Team team;
+        private boolean hovering;
+        private boolean active;
+
+        TeamButton(Team team){
+            this.team=team;   // TeamName proviene del getter de model.Team
+
+            // Dibujando el boton
+            setLayout(new BorderLayout(10,0));
+            setBorder(new EmptyBorder(9,10,9,8));
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setContentAreaFilled(false);
+            setOpaque(false);
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, 58));
+            setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            setUI(new BasicButtonUI());
+
+            addMouseListener(new MouseAdapter() {
+                @Override 
+                public void mouseEntered(MouseEvent e){
+                    hovering = true;
+                    repaint();
+                }
+
+                @Override 
+                public void mouseExited(MouseEvent e){
+                    hovering = false;
+                    repaint();
+                }
+            });
+        }
+
+        Team getTeam(){
+            return team;
+        }
+
+        void setActive(boolean active){
+            this.active = active;
+            repaint();
+        }
+
+        @Override 
+        protected void paintComponent(Graphics g){
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2.setColor(backgroundColor());
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+            g2.dispose();
+
+            super.paintComponent(g);
+        }
+
+        private Color backgroundColor(){
+            if(active) {
+                return SELECTED;
+            }
+            if (hovering){
+                return HOVER;
+            }
+            return BACKGROUND;
+        }
+    }
 }
