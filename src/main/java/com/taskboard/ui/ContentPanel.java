@@ -1,6 +1,5 @@
 package com.taskboard.ui;
 
-import src.main.java.com.taskboard.ui.BoardPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
