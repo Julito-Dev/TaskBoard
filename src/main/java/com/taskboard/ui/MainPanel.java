@@ -21,11 +21,11 @@ public class MainPanel extends JPanel {
         setLayout(new BorderLayout());
 
         // Equipos hardcodeados. Esto no deberia de ir aca. (Solo demo)
-        teams.add(new Team(nextId++, "Universidad", "U", 6));
-        teams.add(new Team(nextId++, "Proyecto", "PR", 1));
+        teams.add(new Team(nextId++, "Universidad", "U"));
+        teams.add(new Team(nextId++, "Proyecto", "PR"));
 
         // El sidebar avisa cual equipo se selecciono y cuando el usuario quiere agregar uno
-        sidebar = new SidebarPanel(teams, content::showTeam, this::askNewTeam);
+        sidebar = new SidebarPanel(teams, content::showTeam, this::askNewTeam, this::taskCountFor);
 
         add(sidebar, BorderLayout.WEST);
         add(content, BorderLayout.CENTER);
@@ -33,14 +33,20 @@ public class MainPanel extends JPanel {
 
 
     private void askNewTeam(){
+        // Dispara el mensaje para agregar un equipo nuevo
         String name = JOptionPane.showInputDialog(this, "Nombre del equipo:", "Nuevo Equipo", JOptionPane.QUESTION_MESSAGE);
         if(name == null || name.isBlank()){
             return;
         }
 
         String formated = name.trim();
-        Team team = new Team(nextId, formated, formated.substring(0,1), 0);
+        Team team = new Team(nextId, formated, formated.substring(0,1));
 
         sidebar.addTeam(team);
+    }
+
+    private int taskCountFor(Team team){
+        // M1: No existe taksRepository en esta Milestone. TaskRepository.getCountByID(team.getID()) se encargara de este metodo.
+        return 0;
     }
 }

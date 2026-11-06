@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicButtonUI;
+import java.util.function.ToIntFunction;
 
 public class SidebarPanel extends JPanel {
 
@@ -40,17 +41,26 @@ public class SidebarPanel extends JPanel {
     // Se dispara cuando el usuario da click en el boton + para agregar un equipo
     private final Runnable onAddTeamRequested;
 
+    // Contador de tareas (Provisional mientras se desarrolla la logica de persistencia real)
+    private final ToIntFunction<Team> taskCountProvider;
+
     //constructor
     public SidebarPanel(Consumer<String> onTeamSelected){    // Este constructor es temporal. No lo usara Main (Solo para debuggear)
-        this(List.of(), onTeamSelected, () -> { }); 
+        this(List.of(), onTeamSelected, () -> { }, team -> 0); 
     }
     
     public SidebarPanel(List<Team> teams, Consumer<String> onTeamSelected){
-        this(teams, onTeamSelected, () -> { });
+        this(teams, onTeamSelected, () -> { }, team -> 0);
     }
+
     public SidebarPanel(List<Team> teams, Consumer<String> onTeamSelected, Runnable onAddTeamRequested){
+        this(teams, onTeamSelected, onAddTeamRequested, team ->0);
+    }
+
+    public SidebarPanel(List<Team> teams, Consumer<String> onTeamSelected, Runnable onAddTeamRequested, ToIntFunction<Team> taskCountProvider){
         this.onTeamSelected = onTeamSelected;
         this.onAddTeamRequested = onAddTeamRequested;
+        this.taskCountProvider = taskCountProvider;
         this.teams.addAll(teams);
 
         setLayout(new BorderLayout());
@@ -211,7 +221,7 @@ public class SidebarPanel extends JPanel {
         teamName.setForeground(TEXT);
         teamName.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        JLabel count = new JLabel(taskCountText(team.getTaskCount()));
+        JLabel count = new JLabel(taskCountText(taskCountProvider.applyAsInt(team)));
         count.setForeground(MUTED);
         count.setFont(new Font("SansSerif", Font.BOLD, 10));
 
