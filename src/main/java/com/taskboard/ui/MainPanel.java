@@ -40,8 +40,9 @@ public class MainPanel extends JPanel {
         }
 
         String formated = name.trim();
-        Team team = new Team(nextId, formated, formated.substring(0,1));
+        Team team = new Team(nextId++, formated, formated.substring(0,1));
 
+        teams.add(team);   //Agrega a la unica lista verdadera 
         sidebar.addTeam(team);
     }
 
