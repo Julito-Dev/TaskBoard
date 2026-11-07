@@ -28,7 +28,7 @@ public class SidebarPanel extends JPanel {
 
     //
     private final JPanel teamsContainer;
-    private final Consumer<String> onTeamSelected;  // Esta funcion recibe un String y no retorna nada, muy util para conectarlo con el
+    private final Consumer<Team> onTeamSelected;  // Esta funcion recibe un Team y no retorna nada, muy util para conectarlo con el
                                                     // Frame principal y avisarle sobre que equipo selecciono el usuario.
     
     // Lista para dibujar (Snapshot de la lista de MainPanel)
@@ -45,19 +45,19 @@ public class SidebarPanel extends JPanel {
     private final ToIntFunction<Team> taskCountProvider;
 
     //constructor
-    public SidebarPanel(Consumer<String> onTeamSelected){    // Este constructor es temporal. No lo usara Main (Solo para debuggear)
+    public SidebarPanel(Consumer<Team> onTeamSelected){    // Este constructor es temporal. No lo usara Main (Solo para debuggear)
         this(List.of(), onTeamSelected, () -> { }, team -> 0); 
     }
     
-    public SidebarPanel(List<Team> teams, Consumer<String> onTeamSelected){
+    public SidebarPanel(List<Team> teams, Consumer<Team> onTeamSelected){
         this(teams, onTeamSelected, () -> { }, team -> 0);
     }
 
-    public SidebarPanel(List<Team> teams, Consumer<String> onTeamSelected, Runnable onAddTeamRequested){
+    public SidebarPanel(List<Team> teams, Consumer<Team> onTeamSelected, Runnable onAddTeamRequested){
         this(teams, onTeamSelected, onAddTeamRequested, team ->0);
     }
 
-    public SidebarPanel(List<Team> teams, Consumer<String> onTeamSelected, Runnable onAddTeamRequested, ToIntFunction<Team> taskCountProvider){
+    public SidebarPanel(List<Team> teams, Consumer<Team> onTeamSelected, Runnable onAddTeamRequested, ToIntFunction<Team> taskCountProvider){
         this.onTeamSelected = onTeamSelected;
         this.onAddTeamRequested = onAddTeamRequested;
         this.taskCountProvider = taskCountProvider;
@@ -277,7 +277,7 @@ public class SidebarPanel extends JPanel {
 
     private void notifyTeamSelected(Team team){
         if(onTeamSelected != null){
-            onTeamSelected.accept(team.getName());
+            onTeamSelected.accept(team);   //Ahora notifica todo el equipo completo.
         }
     }
 
