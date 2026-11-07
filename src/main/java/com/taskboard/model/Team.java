@@ -1,8 +1,5 @@
 package com.taskboard.model;
 
-import java.awt.geom.FlatteningPathIterator;
-import java.security.cert.TrustAnchor;
-
 public class Team {
     // Esta clase representa un equipo simple
     private final int id;
