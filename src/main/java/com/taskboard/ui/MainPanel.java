@@ -10,7 +10,7 @@ import java.util.List;
 
 public class MainPanel extends JPanel {
     // Equipos de la App. El sidebar tiene su propia copia, entonces los cambios se le pasan por su API
-    private final List<Team> teams = new ArrayList<>();
+    private final List<Team> teams = new ArrayList<>();    // ESTA LISTA ES LA CORRECTA
 
     private final ContentPanel content = new ContentPanel();
     private final SidebarPanel sidebar;
@@ -43,7 +43,8 @@ public class MainPanel extends JPanel {
         Team team = new Team(nextId++, formated, formated.substring(0,1));
 
         teams.add(team);   //Agrega a la unica lista verdadera 
-        sidebar.addTeam(team);
+        sidebar.setTeams(teams);  // Crea la snapshot de la lista y los dibuja
+        sidebar.selectTeam(team); // Selecciona el equipo creado automaticamente
     }
 
     private int taskCountFor(Team team){

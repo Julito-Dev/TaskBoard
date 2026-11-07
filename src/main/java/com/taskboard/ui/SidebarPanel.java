@@ -31,8 +31,8 @@ public class SidebarPanel extends JPanel {
     private final Consumer<String> onTeamSelected;  // Esta funcion recibe un String y no retorna nada, muy util para conectarlo con el
                                                     // Frame principal y avisarle sobre que equipo selecciono el usuario.
     
-    // Equipos que muestra el panel. Copia propia para no depender de la lista que le pasa el caller.
-    private final List<Team> teams = new ArrayList<>();
+    // Lista para dibujar (Snapshot de la lista de MainPanel)
+    private List<Team> teams = new ArrayList<>();
 
     // Botones ya creados, uno por cada equipo de la lista
     private  final List<TeamButton> teamsButtons = new ArrayList<>();
@@ -239,8 +239,7 @@ public class SidebarPanel extends JPanel {
 
         // Action listener: Click en el equipo, se marca seleccionado y se avisa al frame principal
         button.addActionListener(e -> {
-            selectTeam(team);
-            notifyTeamSelected(team);
+            selectTeam(team); // Solo notifica una vez
         });
 
         teamsButtons.add(button);
@@ -249,18 +248,8 @@ public class SidebarPanel extends JPanel {
     }
 
     public void setTeams(List<Team> teams){
-        // Reemplaza la lista de equipos de todo el panel
-        this.teams.clear();
-        this.teams.addAll(teams);
-        rebuildTeams();
-    }
-
-    public void addTeam(Team team){
-        // Agrega un equipo nuevo al panel (Lo usara el boton +)
-        teams.add(team);
-        rebuildTeams();
-        selectTeam(team);
-        notifyTeamSelected(team);
+        this.teams = List.copyOf(teams);
+        rebuildTeams();         
     }
 
     private void rebuildTeams(){
@@ -275,7 +264,8 @@ public class SidebarPanel extends JPanel {
         if (selectedTeam != null){
             for(Team team : teams){
                 if(team.getId() == selectedTeam.getId()){
-                    selectTeam(team);
+                    selectedTeam = team;  // Nueva instancia con misma ID
+                    highlight(team); // Lo resalta, no lo notifica.
                     break;
                 }
             }
@@ -291,12 +281,18 @@ public class SidebarPanel extends JPanel {
         }
     }
 
-    private void selectTeam(Team team){
+    public void selectTeam(Team team){
         // Marca el equipo como seleccionado y actualiza el resaltado de los demas botones (equipos)
         selectedTeam = team;
+        highlight(team);
+        notifyTeamSelected(team); 
+    }
 
-        for(TeamButton button : teamsButtons){
-            button.setActive(button.getTeam().getId() == team.getId());
+
+    private void highlight(Team team){
+        // Resalta el boton si su id coincide con el id del equipo.
+        for (TeamButton but: teamsButtons){
+            but.setActive(but.getTeam().getId() == team.getId());
         }
     }
 
