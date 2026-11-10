@@ -20,7 +20,7 @@ public class SqliteTeamRepository implements TeamRepository {
             String insert = """
             INSERT INTO teams (name, icon) VALUES (?,?)""";  //solo 2 campos porque Sqlite asigna automaticamente el ID
             
-            try (Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(insert)){
+            try (Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)){
                 
                 psmt.setString(1, team.getName());
                 psmt.setString(2, team.getIcon());
