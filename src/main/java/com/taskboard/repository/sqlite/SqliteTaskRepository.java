@@ -11,7 +11,12 @@ import java.util.ArrayList;
 
 
 public class SqliteTaskRepository implements TaskRepository {
-    
+
+    private final Database database;
+
+    public SqliteTaskRepository(Database database) {
+        this.database = database;
+    }
 
     // Metodo para guardar - actualizar
     @Override 
@@ -22,7 +27,7 @@ public class SqliteTaskRepository implements TaskRepository {
             INSERT INTO tasks (team_id, title, description, status, position) VALUES (?,?,?,?,?)""";
 
             
-            try (Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(save, Statement.RETURN_GENERATED_KEYS)){
+            try (Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(save, Statement.RETURN_GENERATED_KEYS)){
 
                 psmt.setInt(1, task.getTeamId());
                 psmt.setString(2, task.getTitle());
@@ -52,7 +57,7 @@ public class SqliteTaskRepository implements TaskRepository {
         String update = """
         UPDATE tasks SET title= ?, description= ?, status= ?, position= ? WHERE id = ?""";
 
-        try (Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(update)){
+        try (Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(update)){
             psmt.setString(1, task.getTitle());
             psmt.setString(2, task.getDescription());
             psmt.setString(3, task.getStatus().name());
@@ -76,7 +81,7 @@ public class SqliteTaskRepository implements TaskRepository {
         String findByTeam = """
         SELECT * FROM tasks WHERE team_id = ? ORDER BY position""";
 
-        try (Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(findByTeam)){
+        try (Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(findByTeam)){
 
             psmt.setInt(1, teamId);
 
@@ -104,7 +109,7 @@ public class SqliteTaskRepository implements TaskRepository {
         String findById = """
         SELECT * FROM tasks WHERE id = ?""";
 
-        try (Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(findById)){
+        try (Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(findById)){
 
             psmt.setInt(1, id);
 
@@ -132,7 +137,7 @@ public class SqliteTaskRepository implements TaskRepository {
         SELECT COUNT(*) FROM tasks WHERE team_id = ?
         """;
 
-        try (Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(findByTeam)) {
+        try (Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(findByTeam)) {
 
         psmt.setInt(1, teamId);
 
@@ -156,7 +161,7 @@ public class SqliteTaskRepository implements TaskRepository {
         String delete = """
         DELETE FROM tasks WHERE id = ?""";
 
-        try (Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(delete)){
+        try (Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(delete)){
 
             psmt.setInt(1, id);
             psmt.executeUpdate();
