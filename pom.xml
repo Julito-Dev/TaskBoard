@@ -7,7 +7,7 @@
 
     <groupId>com.taskboard</groupId>
     <artifactId>taskboard</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
 
     <name>TaskBoard</name>
     <description>Aplicación de escritorio para gestionar equipos y tareas</description>
