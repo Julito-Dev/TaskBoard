@@ -14,6 +14,7 @@ import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.List;
+import java.util.function.Consumer;
 public class ContentPanel extends JPanel{
 
     // Colores utiles
@@ -35,8 +36,17 @@ public class ContentPanel extends JPanel{
 
     private final JPanel board;
     private final BoardColumn[] columns;
+    private final Consumer<TaskStatus> onAddTask;
 
     public ContentPanel(){
+        this(status -> { });
+    }
+
+
+    public ContentPanel(Consumer<TaskStatus> onAddTask){
+        this.onAddTask = onAddTask;
+
+
         setLayout(new BorderLayout());
         setBackground(new Color(35, 41, 58));
 
@@ -45,7 +55,6 @@ public class ContentPanel extends JPanel{
         title.setFont(new Font("SansSerif", Font.BOLD, 22));
         title.setBorder(new EmptyBorder(24, 24, 16, 24));
 
-        add(title, BorderLayout.NORTH);
         
         // Team Info Panel
 
@@ -69,9 +78,9 @@ public class ContentPanel extends JPanel{
         add(top, BorderLayout.NORTH);
 
         columns = new BoardColumn[] {
-            new BoardColumn("Por Hacer", TaskStatus.TODO),
-            new BoardColumn("En Progreso", TaskStatus.IN_PROGRESS),
-            new BoardColumn("Hecha", TaskStatus.DONE)
+            new BoardColumn("Por Hacer", TaskStatus.TODO, onAddTask),
+            new BoardColumn("En Progreso", TaskStatus.IN_PROGRESS, onAddTask),
+            new BoardColumn("Hecha", TaskStatus.DONE, onAddTask)
         };
             
         
@@ -136,15 +145,30 @@ public class ContentPanel extends JPanel{
         private final JPanel cards = new JPanel();
         private final TaskStatus status;
 
-        BoardColumn(String label, TaskStatus status) {
+        BoardColumn(String label, TaskStatus status, Consumer<TaskStatus> onAddTask) {
             this.status = status;
             setLayout(new BorderLayout(0, 8));
             setOpaque(false);
 
+            JPanel headerPanel = new JPanel(new BorderLayout());
+            headerPanel.setOpaque(false);
+
             JLabel header = new JLabel(label);
             header.setForeground(TEXT);
             header.setFont(new Font("SansSerif", Font.BOLD, 13));
-            add(header, BorderLayout.NORTH);
+
+            JButton addButton = new JButton("+");
+            addButton.setForeground(ACCENT);
+            addButton.setFont(new Font("SansSerif", Font.BOLD, 18));
+            addButton.setBorderPainted(false);
+            addButton.setContentAreaFilled(false);
+            addButton.setFocusPainted(false);
+            addButton.setToolTipText("Añadir tarea");
+            addButton.addActionListener(e -> onAddTask.accept(status));
+
+            headerPanel.add(header, BorderLayout.WEST);
+            headerPanel.add(addButton, BorderLayout.EAST);
+            add(headerPanel, BorderLayout.NORTH);
 
             cards.setLayout(new BoxLayout(cards, BoxLayout.Y_AXIS));
             cards.setOpaque(false);

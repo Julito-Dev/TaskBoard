@@ -1,14 +1,17 @@
 package com.taskboard.ui;
 
 import com.taskboard.model.Team;
+import com.taskboard.model.Task;
 import com.taskboard.repository.TeamRepository;
 import com.taskboard.repository.TaskRepository;
+import com.taskboard.model.TaskStatus;
 
 import javax.swing.*;
 
 
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,12 +22,13 @@ public class MainPanel extends JPanel {
     private final TaskRepository taskRepository;
 
 
-    private final ContentPanel content = new ContentPanel();
+    private final ContentPanel content;
     private final SidebarPanel sidebar;
 
     public MainPanel(TeamRepository teamRepository, TaskRepository taskRepository){
         this.taskRepository = taskRepository;
         this.teamRepository = teamRepository;
+        content = new ContentPanel(this::askNewTask);
 
         setLayout(new BorderLayout());
 
@@ -62,6 +66,55 @@ public class MainPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "No se pudo guardar el equipo: " + e.getMessage());
         }
 
+    }
+
+
+    private void askNewTask(TaskStatus status){
+        Team team = sidebar.getSelectedTeam();
+        if (team == null){
+            JOptionPane.showMessageDialog(this, "Selecciona un equipo primero");
+            return;
+        }
+
+        JTextField titleField = new JTextField();
+        JTextField descriptionField = new JTextField();
+
+        JPanel form = new JPanel(new GridLayout(0,1,0,6));
+        form.add(new JLabel("Título:"));
+        form.add(titleField);
+        form.add(new JLabel("Descripción (opcional):"));
+        form.add(descriptionField);
+
+        int option = JOptionPane.showConfirmDialog(this, form, "Nueva tarea", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (option != JOptionPane.OK_OPTION){
+            return;
+        }
+
+        String title = titleField.getText().trim();
+        if(title.isBlank()){
+            return;
+        }
+
+        String description = descriptionField.getText().trim();
+        if (description.isBlank()){
+            description = null;
+        }
+
+        int position = nextPosition(team.getId(), status);
+
+        try{
+            taskRepository.save(new Task(0, team.getId(), title, description, status, position));
+            selectTeam(team);       // recarga el board desde la BD
+            sidebar.setTeams(teams);    // actualiza el contador de tareas
+        }
+
+        catch (RuntimeException e){
+            JOptionPane.showMessageDialog(this, "No se pudo guardar la tarea: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private int nextPosition(int teamId, TaskStatus status){
+        return taskRepository.findByTeam(teamId).stream().filter(t -> t.getStatus() == status).mapToInt(Task::getPosition).max().orElse(0) + 1;
     }
 
     private int taskCountFor(Team team){
