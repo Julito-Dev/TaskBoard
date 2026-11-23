@@ -32,10 +32,14 @@ public class MainPanel extends JPanel {
         teams.addAll(teamRepository.findAll());
 
         // El sidebar avisa cual equipo se selecciono y cuando el usuario quiere agregar uno
-        sidebar = new SidebarPanel(teams, content::showTeam, this::askNewTeam, this::taskCountFor);
+        sidebar = new SidebarPanel(teams, this::selectTeam, this::askNewTeam, this::taskCountFor);
 
         add(sidebar, BorderLayout.WEST);
         add(content, BorderLayout.CENTER);
+    }
+
+    private void selectTeam(Team team){
+        content.showTeam(team, taskRepository.findByTeam(team.getId()));
     }
 
 

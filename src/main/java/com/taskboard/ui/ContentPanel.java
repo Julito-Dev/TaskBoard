@@ -4,12 +4,16 @@ package com.taskboard.ui;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import com.taskboard.model.Task;
+import com.taskboard.model.TaskStatus;
 import com.taskboard.model.Team;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.util.List;
 public class ContentPanel extends JPanel{
 
     // Colores utiles
@@ -27,6 +31,10 @@ public class ContentPanel extends JPanel{
     private final JLabel nameLabel = new JLabel();
     private final JLabel idLabel = new JLabel();
     private final JLabel taskcountLabel = new JLabel();
+
+
+    private final JPanel board;
+    private final BoardColumn[] columns;
 
     public ContentPanel(){
         setLayout(new BorderLayout());
@@ -53,18 +61,124 @@ public class ContentPanel extends JPanel{
         teamInfoPanel.add(taskcountLabel);
 
         
-        add(teamInfoPanel, BorderLayout.CENTER);
+        JPanel top = new JPanel();
+        top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
+        top.setOpaque(false);
+        top.add(title);
+        top.add(teamInfoPanel);
+        add(top, BorderLayout.NORTH);
+
+        columns = new BoardColumn[] {
+            new BoardColumn("Por Hacer", TaskStatus.TODO),
+            new BoardColumn("En Progreso", TaskStatus.IN_PROGRESS),
+            new BoardColumn("Hecha", TaskStatus.DONE)
+        };
+            
+        
+        board = new JPanel(new GridLayout(1,3,12,0));
+        board.setOpaque(false);
+        board.setBorder(new EmptyBorder(12,24,24,24));
+        for (BoardColumn column : columns){
+            board.add(column);
+        }
+        board.setVisible(false);
+        add(board, BorderLayout.CENTER);
     }
-
-
     public void showTeam(Team team){
         // Muestra el equipo y su informacion en el Sidebar
+        showTeam(team, List.of());
+    }
+
+    public void showTeam(Team team, List<Task> tasks){
         title.setText(team.getName());
         nameLabel.setText("Nombre: " + team.getName());
         nameLabel.setForeground(TEXT);
         idLabel.setText("ID: " + team.getId());
         idLabel.setForeground(TEXT);
-        taskcountLabel.setText("Tareas: 0"); //ES el unico valor hardcodeado, porque aun no se implementa un repositorio para las tareas.
+        taskcountLabel.setText("Tareas: " + tasks.size());
         taskcountLabel.setForeground(TEXT);
+
+        for (BoardColumn column : columns){
+            TaskStatus status = column.getStatus();
+            column.setTasks(tasks.stream().filter(t -> t.getStatus() == status).toList());
+        }
+
+        board.setVisible(true);
+        revalidate();
+        repaint();
+    }
+
+    private static JPanel createCard(Task task){
+        JPanel card = new JPanel(new BorderLayout(0,4));
+        card.setBackground(HOVER);
+        card.setBorder(new EmptyBorder(10,12,10,12));
+        card.setAlignmentX(LEFT_ALIGNMENT);
+
+        JLabel cardTitle = new JLabel(task.getTitle());
+            cardTitle.setForeground(TEXT);
+            cardTitle.setFont(new Font("SansSerif", Font.BOLD, 13));
+            
+            card.add(cardTitle, BorderLayout.NORTH);
+
+            if (task.getDescription() != null && !task.getDescription().isBlank()) {
+            JLabel desc = new JLabel(task.getDescription());
+            desc.setForeground(MUTED);
+            desc.setFont(new Font("SansSerif", Font.PLAIN, 11));
+            card.add(desc, BorderLayout.CENTER);
+            }
+        
+
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, card.getPreferredSize().height));
+        return card;
+    }
+
+    private static class BoardColumn extends JPanel {
+        private final JPanel cards = new JPanel();
+        private final TaskStatus status;
+
+        BoardColumn(String label, TaskStatus status) {
+            this.status = status;
+            setLayout(new BorderLayout(0, 8));
+            setOpaque(false);
+
+            JLabel header = new JLabel(label);
+            header.setForeground(TEXT);
+            header.setFont(new Font("SansSerif", Font.BOLD, 13));
+            add(header, BorderLayout.NORTH);
+
+            cards.setLayout(new BoxLayout(cards, BoxLayout.Y_AXIS));
+            cards.setOpaque(false);
+
+            JScrollPane scroll = new JScrollPane(cards);
+            scroll.setBorder(null);
+            scroll.setOpaque(false);
+            scroll.getViewport().setOpaque(false);
+            add(scroll, BorderLayout.CENTER);
+        }
+
+        TaskStatus getStatus() {
+            return status;
+        }
+
+        void setTasks(List<Task> tasks) {
+            cards.removeAll();
+
+            if (tasks.isEmpty()) {
+                JLabel empty = new JLabel("Sin tareas");
+                empty.setForeground(MUTED);
+                empty.setFont(new Font("SansSerif", Font.ITALIC, 12));
+                empty.setAlignmentX(LEFT_ALIGNMENT);
+                cards.add(empty);
+            } else {
+                for (Task task : tasks) {
+                    cards.add(createCard(task));
+                    cards.add(Box.createVerticalStrut(8));
+                }
+            }
+
+            cards.add(Box.createVerticalGlue());
+            cards.revalidate();
+            cards.repaint();
+        }
     }
 }
