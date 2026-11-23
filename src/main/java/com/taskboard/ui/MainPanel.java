@@ -28,7 +28,7 @@ public class MainPanel extends JPanel {
     public MainPanel(TeamRepository teamRepository, TaskRepository taskRepository){
         this.taskRepository = taskRepository;
         this.teamRepository = teamRepository;
-        content = new ContentPanel(this::askNewTask);
+        content = new ContentPanel(this::askNewTask, this::moveTask);
 
         setLayout(new BorderLayout());
 
@@ -110,6 +110,27 @@ public class MainPanel extends JPanel {
 
         catch (RuntimeException e){
             JOptionPane.showMessageDialog(this, "No se pudo guardar la tarea: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void moveTask(Task task, TaskStatus nweStatus){
+        if (task == null || nweStatus == null || task.getStatus() == nweStatus){
+            return;
+        }
+
+        Team team = sidebar.getSelectedTeam();
+        if(team == null){
+            return;
+        }
+
+        int position = nextPosition(team.getId(), nweStatus);
+
+        try{
+            taskRepository.save(task.withStatusAndPosition(nweStatus, position));
+            selectTeam(team); 
+        }
+        catch (RuntimeException e){
+            JOptionPane.showMessageDialog(this, "No se pudo mover la tarea: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

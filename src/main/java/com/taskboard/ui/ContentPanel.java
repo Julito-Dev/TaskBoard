@@ -2,6 +2,7 @@ package com.taskboard.ui;
 
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
 import com.taskboard.model.Task;
@@ -12,8 +13,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 public class ContentPanel extends JPanel{
 
@@ -37,15 +40,17 @@ public class ContentPanel extends JPanel{
     private final JPanel board;
     private final BoardColumn[] columns;
     private final Consumer<TaskStatus> onAddTask;
+    private final BiConsumer<Task, TaskStatus> onMoveTask;
+
 
     public ContentPanel(){
-        this(status -> { });
+        this(status -> { }, (task, status) -> { });
     }
 
 
-    public ContentPanel(Consumer<TaskStatus> onAddTask){
+    public ContentPanel(Consumer<TaskStatus> onAddTask, BiConsumer<Task, TaskStatus> onMoveTask){
         this.onAddTask = onAddTask;
-
+        this.onMoveTask = onMoveTask;
 
         setLayout(new BorderLayout());
         setBackground(new Color(35, 41, 58));
@@ -78,12 +83,12 @@ public class ContentPanel extends JPanel{
         add(top, BorderLayout.NORTH);
 
         columns = new BoardColumn[] {
-            new BoardColumn("Por Hacer", TaskStatus.TODO, onAddTask),
-            new BoardColumn("En Progreso", TaskStatus.IN_PROGRESS, onAddTask),
-            new BoardColumn("Hecha", TaskStatus.DONE, onAddTask)
+            new BoardColumn("Por Hacer", TaskStatus.TODO, onAddTask, onMoveTask),
+            new BoardColumn("En Progreso", TaskStatus.IN_PROGRESS, onAddTask, onMoveTask),
+            new BoardColumn("Hecha", TaskStatus.DONE, onAddTask, onMoveTask)
         };
             
-        
+
         board = new JPanel(new GridLayout(1,3,12,0));
         board.setOpaque(false);
         board.setBorder(new EmptyBorder(12,24,24,24));
@@ -117,24 +122,59 @@ public class ContentPanel extends JPanel{
         repaint();
     }
 
-    private static JPanel createCard(Task task){
+    private static void styleButton(JButton button, int size){
+        button.setForeground(ACCENT);
+        button.setFont(new Font("SansSerif", Font.BOLD, size));
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+    }
+
+    private static JPanel createCard(Task task, BiConsumer<Task, TaskStatus> onMoveTask){
         JPanel card = new JPanel(new BorderLayout(0,4));
         card.setBackground(HOVER);
         card.setBorder(new EmptyBorder(10,12,10,12));
         card.setAlignmentX(LEFT_ALIGNMENT);
 
         JLabel cardTitle = new JLabel(task.getTitle());
-            cardTitle.setForeground(TEXT);
-            cardTitle.setFont(new Font("SansSerif", Font.BOLD, 13));
+        cardTitle.setForeground(TEXT);
+        cardTitle.setFont(new Font("SansSerif", Font.BOLD, 13));
             
-            card.add(cardTitle, BorderLayout.NORTH);
+        card.add(cardTitle, BorderLayout.NORTH);
 
-            if (task.getDescription() != null && !task.getDescription().isBlank()) {
-            JLabel desc = new JLabel(task.getDescription());
-            desc.setForeground(MUTED);
-            desc.setFont(new Font("SansSerif", Font.PLAIN, 11));
-            card.add(desc, BorderLayout.CENTER);
+        if (task.getDescription() != null && !task.getDescription().isBlank()) {
+        JLabel desc = new JLabel(task.getDescription());
+        desc.setForeground(MUTED);
+        desc.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        card.add(desc, BorderLayout.CENTER);
+        }
+            
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT,4,0));
+        actions.setOpaque(false);
+        JButton prev = new JButton("<<");
+        JButton next = new JButton(">>");
+        styleButton(prev, 14);
+        styleButton(next, 14);
+
+        TaskStatus[] values = TaskStatus.values();
+        int index = task.getStatus().ordinal();
+        prev.setEnabled(index > 0);
+        next.setEnabled(index < values.length -1);
+
+        prev.addActionListener(e -> {
+            if (index > 0 ){
+                onMoveTask.accept(task, values[index-1]);
             }
+        });
+        next.addActionListener(e -> {
+            if (index < values.length -1 ){
+                onMoveTask.accept(task, values[index +1]);
+            }
+        });
+
+        actions.add(prev);
+        actions.add(next);
+        card.add(actions, BorderLayout.SOUTH);
         
 
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, card.getPreferredSize().height));
@@ -144,9 +184,11 @@ public class ContentPanel extends JPanel{
     private static class BoardColumn extends JPanel {
         private final JPanel cards = new JPanel();
         private final TaskStatus status;
+        private final BiConsumer<Task, TaskStatus> onMoveTask;
 
-        BoardColumn(String label, TaskStatus status, Consumer<TaskStatus> onAddTask) {
+        BoardColumn(String label, TaskStatus status, Consumer<TaskStatus> onAddTask, BiConsumer<Task, TaskStatus> onMoveTask) {
             this.status = status;
+            this.onMoveTask = onMoveTask;
             setLayout(new BorderLayout(0, 8));
             setOpaque(false);
 
@@ -158,11 +200,7 @@ public class ContentPanel extends JPanel{
             header.setFont(new Font("SansSerif", Font.BOLD, 13));
 
             JButton addButton = new JButton("+");
-            addButton.setForeground(ACCENT);
-            addButton.setFont(new Font("SansSerif", Font.BOLD, 18));
-            addButton.setBorderPainted(false);
-            addButton.setContentAreaFilled(false);
-            addButton.setFocusPainted(false);
+            styleButton(addButton, 18);
             addButton.setToolTipText("Añadir tarea");
             addButton.addActionListener(e -> onAddTask.accept(status));
 
@@ -195,7 +233,7 @@ public class ContentPanel extends JPanel{
                 cards.add(empty);
             } else {
                 for (Task task : tasks) {
-                    cards.add(createCard(task));
+                    cards.add(createCard(task, onMoveTask));
                     cards.add(Box.createVerticalStrut(8));
                 }
             }

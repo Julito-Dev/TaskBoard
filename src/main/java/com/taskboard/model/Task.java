@@ -50,6 +50,10 @@ public final class Task {
         return position;
     }
 
+    public Task withStatusAndPosition(TaskStatus newStatus, int newPosition){
+        return new Task(id, teamId, title, description, newStatus, newPosition);
+    }
+
     @Override 
     public String toString(){
         return "Task{id=" + id + ", teamId=" + teamId + ", title='" + title + "', status=" + status + ", position=" + position + "}";
