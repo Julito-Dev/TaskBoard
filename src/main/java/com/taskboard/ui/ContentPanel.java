@@ -27,6 +27,7 @@ public class ContentPanel extends JPanel{
     private static final Color TEXT = new Color(231, 235, 244);
     private static final Color MUTED = new Color(151, 163, 185);
     private static final Color ACCENT = new Color(126, 151, 255);
+    private static final Color DANGER = new Color(255,138,138);
 
 
     private final JLabel title;
@@ -41,16 +42,20 @@ public class ContentPanel extends JPanel{
     private final BoardColumn[] columns;
     private final Consumer<TaskStatus> onAddTask;
     private final BiConsumer<Task, TaskStatus> onMoveTask;
+    private final Consumer<Task> onEditTask;
+    private final Consumer<Task> onDeleteTask;
 
 
     public ContentPanel(){
-        this(status -> { }, (task, status) -> { });
+        this(status -> { }, (task, status) -> { }, task -> { }, task -> { });
     }
 
 
-    public ContentPanel(Consumer<TaskStatus> onAddTask, BiConsumer<Task, TaskStatus> onMoveTask){
+    public ContentPanel(Consumer<TaskStatus> onAddTask, BiConsumer<Task, TaskStatus> onMoveTask, Consumer<Task> onEditTask, Consumer<Task> onDeleteTask){
         this.onAddTask = onAddTask;
         this.onMoveTask = onMoveTask;
+        this.onEditTask = onEditTask;
+        this.onDeleteTask = onDeleteTask;
 
         setLayout(new BorderLayout());
         setBackground(new Color(35, 41, 58));
@@ -83,9 +88,9 @@ public class ContentPanel extends JPanel{
         add(top, BorderLayout.NORTH);
 
         columns = new BoardColumn[] {
-            new BoardColumn("Por Hacer", TaskStatus.TODO, onAddTask, onMoveTask),
-            new BoardColumn("En Progreso", TaskStatus.IN_PROGRESS, onAddTask, onMoveTask),
-            new BoardColumn("Hecha", TaskStatus.DONE, onAddTask, onMoveTask)
+            new BoardColumn("Por Hacer", TaskStatus.TODO, onAddTask, onMoveTask, onEditTask, onDeleteTask),
+            new BoardColumn("En Progreso", TaskStatus.IN_PROGRESS, onAddTask, onMoveTask, onEditTask, onDeleteTask),
+            new BoardColumn("Hecha", TaskStatus.DONE, onAddTask, onMoveTask, onEditTask, onDeleteTask)
         };
             
 
@@ -130,7 +135,7 @@ public class ContentPanel extends JPanel{
         button.setFocusPainted(false);
     }
 
-    private static JPanel createCard(Task task, BiConsumer<Task, TaskStatus> onMoveTask){
+    private static JPanel createCard(Task task, BiConsumer<Task, TaskStatus> onMoveTask, Consumer<Task> onEditTask, Consumer<Task> onDeleteTask){
         JPanel card = new JPanel(new BorderLayout(0,4));
         card.setBackground(HOVER);
         card.setBorder(new EmptyBorder(10,12,10,12));
@@ -172,8 +177,21 @@ public class ContentPanel extends JPanel{
             }
         });
 
+        JButton edit = new JButton("✎");
+        JButton delete = new JButton("✕");
+        styleButton(delete, 13);
+        styleButton(edit, 13);
+        delete.setForeground(DANGER);
+        edit.setToolTipText("Editar tarea");
+        delete.setToolTipText("Eliminar Tarea");
+        edit.addActionListener(e -> onEditTask.accept(task));
+        delete.addActionListener(e -> onDeleteTask.accept(task));
+
+
         actions.add(prev);
         actions.add(next);
+        actions.add(edit);
+        actions.add(delete);
         card.add(actions, BorderLayout.SOUTH);
         
 
@@ -185,10 +203,15 @@ public class ContentPanel extends JPanel{
         private final JPanel cards = new JPanel();
         private final TaskStatus status;
         private final BiConsumer<Task, TaskStatus> onMoveTask;
+        private final Consumer<Task> onEditTask;
+        private final Consumer<Task> onDeleteTask;
 
-        BoardColumn(String label, TaskStatus status, Consumer<TaskStatus> onAddTask, BiConsumer<Task, TaskStatus> onMoveTask) {
+        BoardColumn(String label, TaskStatus status, Consumer<TaskStatus> onAddTask, BiConsumer<Task, TaskStatus> onMoveTask, Consumer<Task> onEditTask, Consumer<Task> onDeleteTask) {
             this.status = status;
             this.onMoveTask = onMoveTask;
+            this.onEditTask = onEditTask;
+            this.onDeleteTask = onDeleteTask;
+
             setLayout(new BorderLayout(0, 8));
             setOpaque(false);
 
@@ -233,7 +256,7 @@ public class ContentPanel extends JPanel{
                 cards.add(empty);
             } else {
                 for (Task task : tasks) {
-                    cards.add(createCard(task, onMoveTask));
+                    cards.add(createCard(task, onMoveTask, onEditTask, onDeleteTask));
                     cards.add(Box.createVerticalStrut(8));
                 }
             }

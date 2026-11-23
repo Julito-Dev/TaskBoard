@@ -28,7 +28,7 @@ public class MainPanel extends JPanel {
     public MainPanel(TeamRepository teamRepository, TaskRepository taskRepository){
         this.taskRepository = taskRepository;
         this.teamRepository = teamRepository;
-        content = new ContentPanel(this::askNewTask, this::moveTask);
+        content = new ContentPanel(this::askNewTask, this::moveTask, this::editTask, this::deleteTask);
 
         setLayout(new BorderLayout());
 
@@ -131,6 +131,78 @@ public class MainPanel extends JPanel {
         }
         catch (RuntimeException e){
             JOptionPane.showMessageDialog(this, "No se pudo mover la tarea: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void editTask(Task task){
+        if (task == null){
+            return;
+        }
+
+        Team team = sidebar.getSelectedTeam();
+        if (team == null){
+            return;
+            } 
+        
+        JTextField titleField = new JTextField(task.getTitle());
+        JTextField descriptionField = new JTextField(task.getDescription() == null ? "" : task.getDescription());
+
+        JPanel form = new JPanel(new GridLayout(0, 1, 0, 6));
+        form.add(new JLabel("Título:"));
+        form.add(titleField);
+        form.add(new JLabel("Descripción:"));
+        form.add(descriptionField);
+        
+
+        int option = JOptionPane.showConfirmDialog(this, form, "Editar Tarea", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (option != JOptionPane.OK_OPTION){
+            return;
+        }
+
+        String title = titleField.getText().trim();
+        if (title.isBlank()){
+            return;
+        }
+
+        String description = descriptionField.getText().trim();
+        if (description.isBlank()){
+            description = null;
+        }
+
+        try{
+            taskRepository.save(task.withDetails(title, description));
+            selectTeam(team);
+        }
+
+        catch (RuntimeException e){
+            JOptionPane.showMessageDialog(this, "No se pudo editar la tarea: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+    private void deleteTask(Task task){
+        if (task == null){
+            return;
+        }
+
+        Team team = sidebar.getSelectedTeam();
+        if (team == null){
+            return;
+        }
+
+        int option = JOptionPane.showConfirmDialog(this, "¿Eliminar la tarea \"" + task.getTitle() + "\"?", "Eliminar tarea", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (option != JOptionPane.YES_OPTION){
+            return;
+        }
+
+        try {
+            taskRepository.delete(task.getId());
+            selectTeam(team);
+            sidebar.setTeams(teams);
+        }
+
+        catch (RuntimeException e){
+            JOptionPane.showMessageDialog(this, "No se pudo eliminar la tarea: "+ e.getMessage(), "Eliminar Tarea", JOptionPane.ERROR_MESSAGE);
         }
     }
 
