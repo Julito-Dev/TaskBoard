@@ -36,7 +36,7 @@ public class MainPanel extends JPanel {
         teams.addAll(teamRepository.findAll());
 
         // El sidebar avisa cual equipo se selecciono y cuando el usuario quiere agregar uno
-        sidebar = new SidebarPanel(teams, this::selectTeam, this::askNewTeam, this::taskCountFor);
+        sidebar = new SidebarPanel(teams, this::selectTeam, this::askNewTeam, this::taskCountFor, this::deleteTeam);
 
         add(sidebar, BorderLayout.WEST);
         add(content, BorderLayout.CENTER);
@@ -203,6 +203,34 @@ public class MainPanel extends JPanel {
 
         catch (RuntimeException e){
             JOptionPane.showMessageDialog(this, "No se pudo eliminar la tarea: "+ e.getMessage(), "Eliminar Tarea", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void deleteTeam(Team team){
+        if (team == null){
+            return;
+        }
+
+        int option = JOptionPane.showConfirmDialog(this, "¿Eliminar el equipo \"" + team.getName() + "\"?\nSus tareas también se eliminarán.", "Eliminar equipo", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (option != JOptionPane.YES_OPTION){
+            return;
+        }
+
+        try{
+            teamRepository.delete(team.getId());
+            teams.removeIf(t -> t.getId() == team.getId());
+
+            Team selected = sidebar.getSelectedTeam();
+            if (selected != null && selected.getId() == team.getId()){
+                sidebar.clearSelection();
+                content.clearTeam();
+            }
+
+            sidebar.setTeams(teams);
+        }
+
+        catch (RuntimeException e){
+            JOptionPane.showMessageDialog(this, "No se pudo eliminar el equipo: " + e.getMessage(), "Eliminar equipo", JOptionPane.ERROR_MESSAGE);
         }
     }
 

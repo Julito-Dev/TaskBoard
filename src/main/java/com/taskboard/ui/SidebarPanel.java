@@ -25,11 +25,14 @@ public class SidebarPanel extends JPanel {
     private static final Color TEXT = new Color(231, 235, 244);
     private static final Color MUTED = new Color(151, 163, 185);
     private static final Color ACCENT = new Color(126, 151, 255);
+    private static final Color DANGER = new Color(255, 138, 138);
 
     //
     private final JPanel teamsContainer;
     private final Consumer<Team> onTeamSelected;  // Esta funcion recibe un Team y no retorna nada, muy util para conectarlo con el
                                                     // Frame principal y avisarle sobre que equipo selecciono el usuario.
+
+    private final Consumer<Team> onDeleteTeamRequested;
     
     // Lista para dibujar (Snapshot de la lista de MainPanel)
     private List<Team> teams = new ArrayList<>();
@@ -46,21 +49,22 @@ public class SidebarPanel extends JPanel {
 
     //constructor
     public SidebarPanel(Consumer<Team> onTeamSelected){    // Este constructor es temporal. No lo usara Main (Solo para debuggear)
-        this(List.of(), onTeamSelected, () -> { }, team -> 0); 
+        this(List.of(), onTeamSelected, () -> { }, team -> 0, team -> { }); 
     }
     
     public SidebarPanel(List<Team> teams, Consumer<Team> onTeamSelected){
-        this(teams, onTeamSelected, () -> { }, team -> 0);
+        this(teams, onTeamSelected, () -> { }, team -> 0, team -> { });
     }
 
     public SidebarPanel(List<Team> teams, Consumer<Team> onTeamSelected, Runnable onAddTeamRequested){
-        this(teams, onTeamSelected, onAddTeamRequested, team ->0);
+        this(teams, onTeamSelected, onAddTeamRequested, team ->0, team -> { });
     }
 
-    public SidebarPanel(List<Team> teams, Consumer<Team> onTeamSelected, Runnable onAddTeamRequested, ToIntFunction<Team> taskCountProvider){
+    public SidebarPanel(List<Team> teams, Consumer<Team> onTeamSelected, Runnable onAddTeamRequested, ToIntFunction<Team> taskCountProvider, Consumer<Team> onDeleteTeamRequested){
         this.onTeamSelected = onTeamSelected;
         this.onAddTeamRequested = onAddTeamRequested;
         this.taskCountProvider = taskCountProvider;
+        this.onDeleteTeamRequested = onDeleteTeamRequested;
         this.teams.addAll(teams);
 
         setLayout(new BorderLayout());
@@ -233,9 +237,23 @@ public class SidebarPanel extends JPanel {
         arrow.setForeground(MUTED);
         arrow.setFont(new Font("SansSerif", Font.PLAIN, 22));
 
+        JButton deleteButton = new JButton("✕");
+        deleteButton.setForeground(DANGER);
+        deleteButton.setFont(new Font("SansSerif", Font.BOLD, 13));
+        deleteButton.setBorderPainted(false);
+        deleteButton.setContentAreaFilled(false);
+        deleteButton.setFocusPainted(false);
+        deleteButton.setToolTipText("Eliminar Equipo");
+        deleteButton.addActionListener(e -> onDeleteTeamRequested.accept(team));
+
+        JPanel trailing = new JPanel(new FlowLayout(FlowLayout.RIGHT, 2, 0));
+        trailing.setOpaque(false);
+        trailing.add(arrow);
+        trailing.add(deleteButton);
+
         button.add(teamIcon, BorderLayout.WEST);
         button.add(details, BorderLayout.CENTER);
-        button.add(arrow, BorderLayout.EAST);
+        button.add(trailing, BorderLayout.EAST);
 
         // Action listener: Click en el equipo, se marca seleccionado y se avisa al frame principal
         button.addActionListener(e -> {
@@ -299,6 +317,13 @@ public class SidebarPanel extends JPanel {
     public Team getSelectedTeam(){
         // Devuelve el equipo que esta seleccionado en el momento.
         return selectedTeam;
+    }
+
+    public void clearSelection(){
+        selectedTeam = null;
+        for (TeamButton button : teamsButtons){
+            button.setActive(false);
+        }
     }
 
     private static String taskCountText(int count){

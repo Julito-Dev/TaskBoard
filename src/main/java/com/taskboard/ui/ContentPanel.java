@@ -135,6 +135,20 @@ public class ContentPanel extends JPanel{
         button.setFocusPainted(false);
     }
 
+    public void clearTeam(){
+        title.setText("Selecciona un equipo");
+        nameLabel.setText("");
+        idLabel.setText("");
+        taskcountLabel.setText("");
+        for (BoardColumn column : columns){
+            column.setTasks(List.of());
+        }
+
+        board.setVisible(false);
+        revalidate();
+        repaint();
+    }
+
     private static JPanel createCard(Task task, BiConsumer<Task, TaskStatus> onMoveTask, Consumer<Task> onEditTask, Consumer<Task> onDeleteTask){
         JPanel card = new JPanel(new BorderLayout(0,4));
         card.setBackground(HOVER);
