@@ -7,12 +7,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class Database {
-    // Esta clase crea una base de datos taskboard.db 
+    // Esta clase crea una base de datos SQLite y expone sus conexiones.
 
-    private static final String URL = "jdbc:sqlite:taskboard.db";
+    private final String url;
 
-    public static Connection getConnection() throws SQLException{
-        Connection conn = DriverManager.getConnection(URL);
+    public Database(String url) {
+        this.url = url;
+    }
+
+    public Connection getConnection() throws SQLException{
+        Connection conn = DriverManager.getConnection(url);
 
         // Habilita la foreign_key
         try(Statement stmt = conn.createStatement()){
@@ -23,7 +27,7 @@ public class Database {
 
     }
 
-    public static void initialize(){
+    public void initialize(){
 
         String createTeams = """
         CREATE TABLE IF NOT EXISTS teams (

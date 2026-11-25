@@ -11,6 +11,11 @@ import java.util.Optional;
 public class SqliteTeamRepository implements TeamRepository {
     // Esta clase es la implementacion de la interfaz para el almacenamiento de equipos.
 
+    private final Database database;
+
+    public SqliteTeamRepository(Database database) {
+        this.database = database;
+    }
 
     // Metodo guardar - actualizar
     @Override 
@@ -20,7 +25,7 @@ public class SqliteTeamRepository implements TeamRepository {
             String insert = """
             INSERT INTO teams (name, icon) VALUES (?,?)""";  //solo 2 campos porque Sqlite asigna automaticamente el ID
             
-            try (Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)){
+            try (Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)){
                 
                 psmt.setString(1, team.getName());
                 psmt.setString(2, team.getIcon());
@@ -48,7 +53,7 @@ public class SqliteTeamRepository implements TeamRepository {
         String update = """
         UPDATE teams SET name= ?, icon= ? WHERE id = ?""";
 
-        try (Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(update)) {
+        try (Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(update)) {
 
             psmt.setString(1, team.getName()); // Actualiza el nombre
             psmt.setString(2, team.getIcon()); // Actualiza el icono
@@ -73,7 +78,7 @@ public class SqliteTeamRepository implements TeamRepository {
         String selectAll = """
         SELECT * FROM teams""";
 
-        try(Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(selectAll); ResultSet data = psmt.executeQuery()){
+        try(Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(selectAll); ResultSet data = psmt.executeQuery()){
 
             // Armar el objeto a partir de sus datos guardados
             while(data.next()){
@@ -99,7 +104,7 @@ public class SqliteTeamRepository implements TeamRepository {
         String findId = """
         SELECT * FROM teams WHERE id = ?""";
 
-        try(Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(findId)){
+        try(Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(findId)){
 
             psmt.setInt(1, id);
 
@@ -126,7 +131,7 @@ public class SqliteTeamRepository implements TeamRepository {
         String delete = """
         DELETE FROM teams WHERE id = ?""";
 
-        try(Connection conn = Database.getConnection(); PreparedStatement psmt = conn.prepareStatement(delete)){
+        try(Connection conn = database.getConnection(); PreparedStatement psmt = conn.prepareStatement(delete)){
 
             psmt.setInt(1, id);
             psmt.executeUpdate();

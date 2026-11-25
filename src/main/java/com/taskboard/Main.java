@@ -15,8 +15,9 @@ public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             // inicializar la BD
+            Database database = new Database("jdbc:sqlite:taskboard.db");
             try{
-                Database.initialize();
+                database.initialize();
             }
             catch(RuntimeException e){
                 JOptionPane.showMessageDialog(null, "No se pudo abrir la base de datos " + e.getMessage());
@@ -24,9 +25,9 @@ public class Main {
             }
 
 
-            TeamRepository teamRepository = new SqliteTeamRepository();
-            TaskRepository taskRepository = new SqliteTaskRepository();
-                
+            TeamRepository teamRepository = new SqliteTeamRepository(database);
+            TaskRepository taskRepository = new SqliteTaskRepository(database);
+            
             // Crear la ventana
             JFrame window = new JFrame("TaskBoard");
             window.setSize(900,600);
